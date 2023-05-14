@@ -6,6 +6,7 @@
 Servo servo;
 int pos = 0;
 int a;
+int state = 0;
 
 void setup()
 {
@@ -29,7 +30,14 @@ void loop()
 {
   while(!Serial.available());
   a = Serial.readString().toInt();
-  Serial.print(a + 1);
+
+  if (a == 0) {
+    servo.write(0);
+    delay(3);
+  } else {
+    servo.write(180);
+    delay(3);
+  }
 
 	// for (pos = 75; pos <= 105; pos++) {
   //   servo.write(pos);
