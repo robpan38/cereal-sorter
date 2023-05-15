@@ -14,14 +14,17 @@ from keras.models import load_model  # TensorFlow is required for Keras to work
 import cv2  # Install opencv-python
 import numpy as np
 
+labels_file = "cereal_labels.txt"
+model_file = "cereal_model.h5"
+
 # Disable scientific notation for clarity
 np.set_printoptions(suppress=True)
 
 # Load the model
-model = load_model("keras_Model.h5", compile=False)
+model = load_model(model_file, compile=False)
 
 # Load the labels
-class_names = open("labels.txt", "r").readlines()
+class_names = open(labels_file, "r").readlines()
 
 # CAMERA can be 0 or 1 based on default camera of your computer
 camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -37,15 +40,18 @@ results = []
 while True:
     if len(results) == 10:
         if check_all(results, 1) == True:
-            print("conditie zambet")
             for i in range(100):
                 arduino.write(bytes(str(1), 'utf-8'))
             arduino.flush()
             results = []
         elif check_all(results, 0) == True:
-            print("conditie gura deschisa")
             for i in range(100):
                 arduino.write(bytes(str(0), 'utf-8'))
+            arduino.flush()
+            results = []
+        elif check_all(results, 2) == True:
+            for i in range(100):
+                arduino.write(bytes(str(2), 'utf-8'))
             arduino.flush()
             results = []
         else:
@@ -73,10 +79,12 @@ while True:
     confidence_score = prediction[0][index]
 
     # Print prediction and confidence score
-    if "smile" in class_name:
+    if "cacao" in class_name:
+        results.append(1)
+    elif "vanilla" in class_name:
         results.append(0)
     else:
-        results.append(1)
+        results.append(2)
 
     print("Class:", class_name[2:], end="")
     print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
